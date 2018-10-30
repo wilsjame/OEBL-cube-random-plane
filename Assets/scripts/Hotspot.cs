@@ -11,6 +11,28 @@ public class Hotspot : MonoBehaviour
     public delegate void HotspotExited(GameObject someCube);
     public static event HotspotExited OnExited;
 
+    private Material cachedMaterial;
+
+    private void Start()
+    {
+
+	/* Color hotspot according to plane. */
+	cachedMaterial = GetComponent<Renderer>().material;
+
+	switch (gameObject.tag) {
+		case "front":
+			cachedMaterial.SetColor("_Color", Color.yellow);
+			break;
+		case "middle":
+			cachedMaterial.SetColor("_Color", Color.green);
+			break;
+		case "back":
+			cachedMaterial.SetColor("_Color", new Color(.12f, .56f, 1.0f, 1f));
+			break;
+	}
+
+    }
+
     private void OnTriggerEnter(Collider other)
     {
   
@@ -18,8 +40,8 @@ public class Hotspot : MonoBehaviour
         {
             OnEntered(other.gameObject);
 
-			/* Call test function */
-			GameObject.Find ("GameObject_SpawnHotSpots").GetComponent<SpawnHotspots> ().HotSpotTriggerInstantiate ();
+			/* Spawn new trigger point */
+			GameObject.Find ("SpawnHotSpots").GetComponent<SpawnHotspots> ().HotSpotTriggerInstantiate ();
 
 			/* Remove this hotspot when triggered */
 			Destroy (this.gameObject);
