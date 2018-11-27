@@ -38,8 +38,13 @@ public class SpawnHotspots : MonoBehaviour {
 	public int trial = 0;					/* Keep track of completed trials */
 
 	public string fileName = "cube_random_plane_task_time_";
-	public Stopwatch stopwatch = new Stopwatch();
 	public string path;
+
+	public Stopwatch trial_stopwatch = new Stopwatch();
+	public System.TimeSpan trial_time; 
+	public System.TimeSpan plane_1_time;
+	public System.TimeSpan plane_2_time;
+	public System.TimeSpan plane_3_time;
 	
 	/* Use this for initialization */
 	void Start () 
@@ -50,9 +55,9 @@ public class SpawnHotspots : MonoBehaviour {
 		fileName = fileName.Replace("/","-");
 		fileName = fileName.Replace(":",";");
 		path = Path.Combine(Application.persistentDataPath, fileName);
-		//Test outfile
-		//File.WriteAllText(@path, "trace");
-		
+		UnityEngine.Debug.Log(fileName);
+		UnityEngine.Debug.Log(Application.persistentDataPath);
+
 		initializeCoordinates (ref coOrds_collection, ref counter_collection, ref coOrds_collection_1, ref coOrds_collection_2, ref coOrds_collection_3);
 
 		/* Call function once on startup to create initial hotspot */
@@ -154,7 +159,7 @@ public class SpawnHotspots : MonoBehaviour {
 		CoOrds coords_temp = new CoOrds ();
 
 		/* Fisher Yates shuffle coordinate lists to randomize spawn order */
-	UnityEngine.Debug.Log ("Shuffling spawn points within planes...");
+		//UnityEngine.Debug.Log ("Shuffling spawn points within planes...");
 
 		/* z = 0 frame */ 
 		for (i = 0; i < coOrds_collection_1.Count; i++) {
@@ -187,7 +192,7 @@ public class SpawnHotspots : MonoBehaviour {
 		}
 		
 		/* Randomize the plane order */ 
-	UnityEngine.Debug.Log("Plane order before shuffle: " + order[0] + order[1] + order[2]);
+		//UnityEngine.Debug.Log("Plane order before shuffle: " + order[0] + order[1] + order[2]);
 		
 		for (i = 0; i < 3; i++) {
 			random_placeholder = i + Random.Range (0, 3 - i);
@@ -198,7 +203,7 @@ public class SpawnHotspots : MonoBehaviour {
 			order[random_placeholder] = temp;
 		}
 		
-	UnityEngine.Debug.Log("Plane order after shuffle: " + order[0] + order[1] + order[2]);
+		//UnityEngine.Debug.Log("Plane order after shuffle: " + order[0] + order[1] + order[2]);
 		
 		/* Randomly add each shuffled plane into the coOrds_collection list */
 		coOrds_collection.Clear();
@@ -256,22 +261,22 @@ public class SpawnHotspots : MonoBehaviour {
 
 		/* check if user has tapped first point */
 		if (itr == 1) {
-			// Begin timing
-			stopwatch.Start();
+			// Begin trial timing
+			trial_stopwatch.Start();
 		}
 
 		CoOrds coords_temp = new CoOrds (); 				
 		
 		/* Begin spawning */
 		if (itr < coOrds_collection.Count) {
-		UnityEngine.Debug.Log ("coOrds_collection count: " + coOrds_collection.Count + " itr: " + itr);
+		//UnityEngine.Debug.Log ("coOrds_collection count: " + coOrds_collection.Count + " itr: " + itr);
 			
 			/* Copy the next coordinate in the list to the temp variable */
 			coords_temp = coOrds_collection [itr];
-			itr++;
 
 			/* Spawn the point */ 
 			Transform local_trigger_point = Instantiate (trigger_point, new Vector3 (coords_temp.x, coords_temp.y, coords_temp.z), Quaternion.identity, this.transform); // Make this gameObject the parent
+			local_trigger_point.localPosition = new Vector3 (coords_temp.x, coords_temp.y, coords_temp.z); // Spawn position relative to parent
 
 			switch (coords_temp.plane) {
 				case "front":
@@ -283,40 +288,66 @@ public class SpawnHotspots : MonoBehaviour {
 				case "back":
 					local_trigger_point.tag = "back";
 					break;
-			}	
-
-			local_trigger_point.localPosition = new Vector3 (coords_temp.x, coords_temp.y, coords_temp.z); // Spawn position relative to parent
-
-			/*UnityEngine.Debugging */
-			if (itr == coOrds_collection.Count) {
-			UnityEngine.Debug.Log ("Entire Coords_Collection spawned!");
-			UnityEngine.Debug.Log ("coOrds_collection count: " + coOrds_collection.Count + " itr: " + itr);
 			}
 
+			// Plane timing
+			if (itr == 9) {
+				trial_time = trial_stopwatch.Elapsed;
+				plane_1_time = trial_time;
+				coords_temp = coOrds_collection [itr - 1]; // Copy the previous coordinate in the list to determine last plane
+				UnityEngine.Debug.Log("Plane 1: " + coords_temp.plane + " " + plane_1_time);
+
+				// Write time to file
+				File.AppendAllText(@path, "Plane 1 " + coords_temp.plane + " : ");
+				File.AppendAllText(@path, plane_1_time.ToString());
+				File.AppendAllText(@path, "\r\n");
+			}
+			else if (itr == 18) {
+				trial_time = trial_stopwatch.Elapsed;
+				plane_2_time = trial_time - plane_1_time;
+				coords_temp = coOrds_collection [itr - 1]; // Copy the previous coordinate in the list to determine last plane
+				UnityEngine.Debug.Log("Plane 2: " + coords_temp.plane + " " + plane_2_time);
+
+				// Write time to file
+				File.AppendAllText(@path, "Plane 2 " + coords_temp.plane + " : ");
+				File.AppendAllText(@path, plane_2_time.ToString());
+				File.AppendAllText(@path, "\r\n");
+			}
+				
+			itr++;
 		}
 		/* Start new trial and update counter */
 		else {
-		UnityEngine.Debug.Log( "Starting a new trial!" );
+		//UnityEngine.Debug.Log( "Starting a new trial!" );
 
-			/* Copy counter location coordinates */
-			coords_temp = counter_collection [trial];
 			trial++;
 
-			// Stop timing
-			System.TimeSpan ts = stopwatch.Elapsed;
-			stopwatch.Stop();
-			UnityEngine.Debug.Log("Time elapsed: " + ts);
-			stopwatch.Reset();
+			// Plane and trial timing
+			trial_time = trial_stopwatch.Elapsed;
+			trial_stopwatch.Stop();
+			plane_3_time = trial_time - plane_2_time - plane_1_time;
+			coords_temp = coOrds_collection [itr - 1]; // Copy the previous coordinate in the list to determine last plane
+			UnityEngine.Debug.Log("Plane 3: " + coords_temp.plane + " " + plane_3_time);
+			UnityEngine.Debug.Log("Trial " + trial + ": " + trial_time);
+			trial_stopwatch.Reset();
 
-			// Write time to file
-			File.AppendAllText(@path, "Trial " + trial + " : ");
-			File.AppendAllText(@path, ts.ToString());
+			// Write plane time to file
+			File.AppendAllText(@path, "Plane 3 " + coords_temp.plane + " : ");
+			File.AppendAllText(@path, plane_3_time.ToString());
 			File.AppendAllText(@path, "\r\n");
+
+			// Write trial time to file
+			File.AppendAllText(@path, "Trial " + trial + " : ");
+			File.AppendAllText(@path, trial_time.ToString());
+			File.AppendAllText(@path, "\r\n");
+
+			/* Copy counter location coordinates */
+			coords_temp = counter_collection [trial - 1];
 
 			/* Spawn counter */
 			Transform local_trial_counter = Instantiate (trial_counter, new Vector3 (coords_temp.x, coords_temp.y, coords_temp.z), Quaternion.identity, this.transform); // Make this gameObject the parent
 			local_trial_counter.localPosition = new Vector3 (coords_temp.x, coords_temp.y, coords_temp.z); // Spawn position relative to parent
-		UnityEngine.Debug.Log( "Trial " + trial + " completed!");
+			UnityEngine.Debug.Log( "Trial " + trial + " completed!");
 
 			if (trial < 3) {
 				reset();
