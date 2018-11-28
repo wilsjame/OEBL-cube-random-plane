@@ -298,8 +298,8 @@ public class SpawnHotspots : MonoBehaviour {
 				UnityEngine.Debug.Log("Plane 1: " + coords_temp.plane + " " + plane_1_time);
 
 				// Write time to file
-				File.AppendAllText(@path, "Plane 1 " + coords_temp.plane + " : ");
-				File.AppendAllText(@path, plane_1_time.ToString());
+				File.AppendAllText(@path, "Plane 1" + " : ");
+				File.AppendAllText(@path, plane_1_time.ToString() + " " + coords_temp.plane);
 				File.AppendAllText(@path, "\r\n");
 			}
 			else if (itr == 18) {
@@ -309,8 +309,8 @@ public class SpawnHotspots : MonoBehaviour {
 				UnityEngine.Debug.Log("Plane 2: " + coords_temp.plane + " " + plane_2_time);
 
 				// Write time to file
-				File.AppendAllText(@path, "Plane 2 " + coords_temp.plane + " : ");
-				File.AppendAllText(@path, plane_2_time.ToString());
+				File.AppendAllText(@path, "Plane 2" + " : ");
+				File.AppendAllText(@path, plane_2_time.ToString() + " " + coords_temp.plane);
 				File.AppendAllText(@path, "\r\n");
 			}
 				
@@ -332,8 +332,8 @@ public class SpawnHotspots : MonoBehaviour {
 			trial_stopwatch.Reset();
 
 			// Write plane time to file
-			File.AppendAllText(@path, "Plane 3 " + coords_temp.plane + " : ");
-			File.AppendAllText(@path, plane_3_time.ToString());
+			File.AppendAllText(@path, "Plane 3" + " : ");
+			File.AppendAllText(@path, plane_3_time.ToString() + " " + coords_temp.plane);
 			File.AppendAllText(@path, "\r\n");
 
 			// Write trial time to file
