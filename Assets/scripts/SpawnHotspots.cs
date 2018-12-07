@@ -41,6 +41,7 @@ public class SpawnHotspots : MonoBehaviour {
 	public string path;
 
 	public Stopwatch trial_stopwatch = new Stopwatch();
+	public Stopwatch plane_stopwatch = new Stopwatch();
 	public System.TimeSpan trial_time; 
 	public System.TimeSpan plane_1_time;
 	public System.TimeSpan plane_2_time;
@@ -261,8 +262,20 @@ public class SpawnHotspots : MonoBehaviour {
 
 		/* check if user has tapped first point */
 		if (itr == 1) {
-			// Begin trial timing
+			// Begin trial and plane 1 timing
+			UnityEngine.Debug.Log( "Start a trial and plane 1 timing." );
 			trial_stopwatch.Start();
+			plane_stopwatch.Start();
+		}
+		else if (itr == 10) {
+			// Begin plane 2 timing
+			UnityEngine.Debug.Log( "Start plane 2 timing." );
+			plane_stopwatch.Start();
+		}
+		else if (itr == 19) {
+			// Begin plane 3 timing
+			UnityEngine.Debug.Log( "Start plane 3 timing." );
+			plane_stopwatch.Start();
 		}
 
 		CoOrds coords_temp = new CoOrds (); 				
@@ -292,8 +305,8 @@ public class SpawnHotspots : MonoBehaviour {
 
 			// Plane timing
 			if (itr == 9) {
-				trial_time = trial_stopwatch.Elapsed;
-				plane_1_time = trial_time;
+				plane_1_time = plane_stopwatch.Elapsed; 
+				plane_stopwatch.Reset();
 				coords_temp = coOrds_collection [itr - 1]; // Copy the previous coordinate in the list to determine last plane
 				UnityEngine.Debug.Log("Plane 1: " + coords_temp.plane + " " + plane_1_time);
 
@@ -303,8 +316,8 @@ public class SpawnHotspots : MonoBehaviour {
 				File.AppendAllText(@path, "\r\n");
 			}
 			else if (itr == 18) {
-				trial_time = trial_stopwatch.Elapsed;
-				plane_2_time = trial_time - plane_1_time;
+				plane_2_time = plane_stopwatch.Elapsed; 
+				plane_stopwatch.Reset();
 				coords_temp = coOrds_collection [itr - 1]; // Copy the previous coordinate in the list to determine last plane
 				UnityEngine.Debug.Log("Plane 2: " + coords_temp.plane + " " + plane_2_time);
 
@@ -324,8 +337,9 @@ public class SpawnHotspots : MonoBehaviour {
 
 			// Plane and trial timing
 			trial_time = trial_stopwatch.Elapsed;
-			trial_stopwatch.Stop();
-			plane_3_time = trial_time - plane_2_time - plane_1_time;
+			trial_stopwatch.Reset();
+			plane_3_time = plane_stopwatch.Elapsed; 
+			plane_stopwatch.Reset();
 			coords_temp = coOrds_collection [itr - 1]; // Copy the previous coordinate in the list to determine last plane
 			UnityEngine.Debug.Log("Plane 3: " + coords_temp.plane + " " + plane_3_time);
 			UnityEngine.Debug.Log("Trial " + trial + ": " + trial_time);
